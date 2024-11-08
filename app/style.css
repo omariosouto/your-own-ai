@@ -14,8 +14,17 @@ body {
     Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
+:root {
+  --widgets-width: 80vw;
+}
+@media (min-width: 768px) {
+  :root {
+    --widgets-width: 50vw;
+  }
+}
+
 .output {
-  max-width: 50vw;
+  max-width: var(--widgets-width);
   background-color: #111111;
   color: #ffffff;
   margin: 0 auto;
@@ -43,7 +52,7 @@ body {
   left: 0;
   right: 0;
   margin: 0 auto;
-  max-width: 50%;
+  max-width: var(--widgets-width);
   font-size: 1rem;
   color: #ffffff;
 
