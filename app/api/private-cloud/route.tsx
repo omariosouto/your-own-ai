@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       }
     ],
     llm: gemini,
-    tools: [getISODateTime, githubProfile],
+    tools: [getISODateTime, githubProfile, getLatestRepositories],
   });
 
   const response = await agent.chat({
@@ -68,6 +68,26 @@ const githubProfile = new FunctionTool(
   {
     name: "githubProfile",
     description: "Get information about a github user",
+    parameters: {
+      type: "object",
+      properties: {
+        username: { type: "string", description: "The username to search for" }
+      },
+      required: ["username"],
+    },
+  }
+);
+
+const getLatestRepositories = new FunctionTool(
+  async ({ username }: { username: string }): Promise<string> => {
+    // fetch from most recent repositories to oldest
+    const response = await fetch(`https://api.github.com/users/${username}/repos?sort=created&direction=desc`);
+    const data = await response.json();
+    return `These are the latest repositories from ${username}: ${JSON.stringify(data)}`;
+  },
+  {
+    name: "getLatestRepositories",
+    description: "Get the latest repositories from a github user",
     parameters: {
       type: "object",
       properties: {
