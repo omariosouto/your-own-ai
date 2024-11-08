@@ -70,6 +70,22 @@ body {
       width: 1.5rem;
       height: 1.5rem;
     }
+    & ~ .loading {
+      position: absolute;
+      right: 1rem;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: currentColor;
+      text-indent: -9999px;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      border-bottom-color: #ffffff;
+      border-left-color: #ffffff;
+      animation: spin 1s linear infinite;
+    }
   }
 }
 
@@ -136,5 +152,14 @@ body {
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
