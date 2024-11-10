@@ -1,46 +1,47 @@
 import { FunctionTool, Gemini, GEMINI_MODEL, LLMAgent, ToolMetadata } from "llamaindex";
 
 export async function GET(request: Request) {
-  const searchParams = new URL(request.url).searchParams;
-  const inputMessage = searchParams.get('message') || "Qual o meu nome?";
+  try {
+    const searchParams = new URL(request.url).searchParams;
+    const inputMessage = searchParams.get('message') || "Qual o meu nome?";
 
-  const gemini = new Gemini({
-    model: GEMINI_MODEL.GEMINI_PRO_1_5_FLASH,
-  });
-  const agent = new LLMAgent({
-    chatHistory: [
-      {
-        content: `
+    const gemini = new Gemini({
+      model: GEMINI_MODEL.GEMINI_PRO_1_5_FLASH,
+    });
+    const agent = new LLMAgent({
+      chatHistory: [
+        {
+          content: `
           Informações pessoais só para você guardar na memória:
-          - Nome: Mario Souto
-          - Usuário no github: omariosouto
+          - Nome: André Menezes
+          - Usuário no github: aaamenezes
+
+          Regras para você seguir em todas as respostas:
+          - Por favor, responda somente em português
         `,
-        role: "memory"
-      },
-      {
-        content: "Por favor, responda somente em português",
-        role: "memory"
-      },
-      {
-        content: "Responda somente as perguntas que forem feitas a partir de agora, finja que a conversa inicia a partir da próxima mensagem",
-        role: "memory"
-      }
-    ],
-    llm: gemini,
-    tools: [getISODateTime, githubProfile, getLatestRepositories],
-  });
+          role: "memory"
+        }
+      ],
+      llm: gemini,
+      tools: [getISODateTime, getCurrentMonth, githubProfile, getLatestRepositories],
+    });
 
-  const response = await agent.chat({
-    message: inputMessage,
-  });
+    const response = await agent.chat({
+      message: inputMessage,
+    });
 
-  console.log(response.message);
+    console.log(response.message);
 
-  const data = {
-    message: response.message.content,
-  };
-
-  return Response.json({ data })
+    const data = {
+      message: response.message.content.toString()
+        // remove emojis
+        .replace(/[^\p{L}\p{N}\p{P}\p{Z}^$\n]/gu, ''),
+    };
+    return Response.json({ data })
+  } catch (e) {
+    console.error(e);
+    return Response.json({ data: { message: "Opa, tive problemas para processar o que você me disse..." } });
+  }
 }
 
 const getISODateTime = new FunctionTool(
@@ -50,10 +51,26 @@ const getISODateTime = new FunctionTool(
   },
   {
     name: "getTime",
-    description: "Use this function to get time related questions",
+    description: "Use this function to get date time related questions",
     parameters: {
       type: "object",
       properties: { a: { type: "string", description: "Ignore this parameter", }, },
+      required: [],
+    },
+  }
+);
+
+const getCurrentMonth = new FunctionTool(
+  async ({ _: _ }: { _: string }): Promise<string> => {
+    const currentMonth = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', month: 'long' });
+    return `The current month is ${currentMonth}`;
+  },
+  {
+    name: "getCurrentMonth",
+    description: "Get the current month",
+    parameters: {
+      type: "object",
+      properties: { _: { type: "string", description: "Ignore this parameter", }, },
       required: [],
     },
   }

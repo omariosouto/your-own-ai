@@ -33,6 +33,11 @@ export default function HomeScreen() {
             .then(({ data }) => {
               event.target[0].value = "";
               setResponse(data.message);
+              console.log("data.message", data.message);
+              const speechSynthesis = new SpeechSynthesisUtterance(data.message);
+              speechSynthesis.lang = 'pt-BR';
+              speechSynthesis.pitch = 1;
+              window.speechSynthesis.speak(speechSynthesis);
             })
             .finally(() => setLoading(false));
         }}
