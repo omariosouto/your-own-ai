@@ -64,6 +64,7 @@ body {
     width: 100%;
     padding: 1rem;
     padding-left: 3rem;
+    padding-right: 3rem;
     outline: none;
     &::placeholder {
       color: #ffffff;

@@ -1,17 +1,15 @@
 import { FunctionTool, Gemini, GEMINI_MODEL, LLMAgent, ToolMetadata } from "llamaindex";
 
 export async function GET(request: Request) {
-  try {
-    const searchParams = new URL(request.url).searchParams;
-    const inputMessage = searchParams.get('message') || "Qual o meu nome?";
+  const searchParams = new URL(request.url).searchParams;
+  const inputMessage = searchParams.get('message') || "Olá, Siri!";
 
-    const gemini = new Gemini({
-      model: GEMINI_MODEL.GEMINI_PRO_1_5_FLASH,
-    });
-    const agent = new LLMAgent({
-      chatHistory: [
-        {
-          content: `
+  const gemini = new Gemini({ model: GEMINI_MODEL.GEMINI_PRO_1_5_FLASH });
+
+  const agent = new LLMAgent({
+    chatHistory: [
+      {
+        content: `
           Informações pessoais só para você guardar na memória:
           - Nome: André Menezes
           - Usuário no github: aaamenezes
@@ -19,29 +17,25 @@ export async function GET(request: Request) {
           Regras para você seguir em todas as respostas:
           - Por favor, responda somente em português
         `,
-          role: "memory"
-        }
-      ],
-      llm: gemini,
-      tools: [getISODateTime, getCurrentMonth, githubProfile, getLatestRepositories],
-    });
+        role: "memory"
+      }
+    ],
+    llm: gemini,
+    tools: [getISODateTime, getCurrentMonth, githubProfile, getLatestRepositories],
+  });
 
-    const response = await agent.chat({
-      message: inputMessage,
-    });
+  const response = await agent.chat({
+    message: inputMessage,
+  });
 
-    console.log(response.message);
+  console.log(response.message);
 
-    const data = {
-      message: response.message.content.toString()
-        // remove emojis
-        .replace(/[^\p{L}\p{N}\p{P}\p{Z}^$\n]/gu, ''),
-    };
-    return Response.json({ data })
-  } catch (e) {
-    console.error(e);
-    return Response.json({ data: { message: "Opa, tive problemas para processar o que você me disse..." } });
-  }
+  const data = {
+    message: response.message.content.toString()
+      // remove emojis
+      .replace(/[^\p{L}\p{N}\p{P}\p{Z}^$\n]/gu, ''),
+  };
+  return Response.json({ data })
 }
 
 const getISODateTime = new FunctionTool(
